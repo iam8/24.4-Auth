@@ -6,7 +6,7 @@
 Flask app for user feedback: route and view definitions.
 """
 
-from flask import Flask, redirect, render_template, flash
+from flask import Flask, redirect, render_template, session, flash
 from flask_debugtoolbar import DebugToolbarExtension
 
 from models import db, connect_db, User
@@ -58,7 +58,9 @@ def register_user():
         db.session.add(new_user)
         db.session.commit()
 
+        session["username"] = new_user.username  # Keep user logged in
         flash(f"Registration successful for user {new_user.username}!")
+
         return redirect("/secret")
 
     return render_template("register.jinja2", form=form)
@@ -80,13 +82,16 @@ def login_user():
         username = form.username.data
         password = form.password.data
 
-        user = User.authenticate(username=username, password=password)
+        user = User.authenticate(username, password)
 
         if user:
+            session["username"] = user.username  # Keep user logged in
             flash(f"Welcome back, {user.username}!")
+
             return redirect("/secret")
         else:
-            flash("ERROR: could not log you in.")
+            form.username.errors = ["Incorrect username or password"]
+
             return redirect("/login")
 
     return render_template("login.jinja2", form=form)
