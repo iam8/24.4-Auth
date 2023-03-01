@@ -22,6 +22,14 @@
 
 <body>
 
+    {% if 'username' in session %}
+        <li><a href="/logout">Logout</a></li>
+        <li><a href="/secret">Secret</a></li>
+    {% else %}
+        <li><a href="/register">Register</a></li>
+        <li><a href="/login">Login</a></li>
+    {% endif %}
+
     {% for msg in get_flashed_messages() %}
         <p style="background-color:red">{{ msg }}</p>
     {% endfor %}
