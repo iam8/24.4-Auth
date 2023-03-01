@@ -34,24 +34,24 @@ def display_home():
     return redirect("/register")
 
 
-@app.route("/register")
+@app.route("/register", methods=["GET", "POST"])
 def display_register_form():
     """
     Display a form for a user to register with.
+
+    Route & view for registering a new user to the Feedback app.
+        - Displays registration form
+        - Validates user-entered form values
+        - Handles user registration if validation successful
     """
 
     form = RegisterUserForm()
 
+    if form.validate_on_submit():
+
+        return redirect("/secret")
+
     return render_template("register.jinja2", form=form)
-
-
-@app.route("/register", methods=["POST"])
-def register_user():
-    """
-    Handle user registration.
-    """
-
-    return redirect("/secret")
 
 
 @app.route("/login")
