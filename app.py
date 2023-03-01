@@ -9,7 +9,8 @@ Flask app for user feedback: route and view definitions.
 from flask import Flask, redirect, render_template
 from flask_debugtoolbar import DebugToolbarExtension
 
-from models import db, connect_db
+from models import db, connect_db, User
+from forms import RegisterUserForm, LoginUserForm
 
 
 app = Flask(__name__)
