@@ -23,7 +23,7 @@
 <body>
 
     {% for msg in get_flashed_messages() %}
-        <p style="{background-color:red}">{{ msg }}</p>
+        <p style="background-color:red">{{ msg }}</p>
     {% endfor %}
 
     {% block content %}
