@@ -5,3 +5,34 @@
 {# User registration page. #}
 
 {% extends "base.jinja2" %}
+
+{% block title %}
+    Register
+{% endblock title %}
+
+{% block content %}
+
+    <h1>Register</h1>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <fieldset>
+            {% for field in form if field.widget.input_type != "hidden" %}
+
+                <div>
+                    {{ field.label }}
+                    {{ field }}
+                </div>
+
+                {% for error in field.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+
+            {% endfor %}
+        </fieldset>
+
+        <button type="submit">Add</button>
+    </form>
+
+{% endblock content %}
