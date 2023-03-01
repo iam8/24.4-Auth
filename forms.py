@@ -8,7 +8,7 @@ Form model creation and setup.
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, EmailField
-from wtforms.validators import InputRequired, Email
+from wtforms.validators import InputRequired
 
 
 class RegisterUserForm(FlaskForm):
@@ -25,7 +25,7 @@ class RegisterUserForm(FlaskForm):
                              render_kw={"placeholder": "Enter a password"})
 
     email = EmailField("Email",
-                       validators=[InputRequired(), Email()],
+                       validators=[InputRequired()],
                        render_kw={"placeholder": "Enter your email address"})
 
     first_name = StringField("First name",
