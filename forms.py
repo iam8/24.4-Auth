@@ -8,6 +8,7 @@ Form model creation and setup.
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, EmailField
+from wtforms.validators import InputRequired, Email
 
 
 class RegisterUserForm(FlaskForm):
@@ -16,18 +17,23 @@ class RegisterUserForm(FlaskForm):
     """
 
     username = StringField("Username",
+                           validators=[InputRequired()],
                            render_kw={"placeholder": "Enter a username"})
 
     password = PasswordField("Password",
+                             validators=[InputRequired()],
                              render_kw={"placeholder": "Enter a password"})
 
     email = EmailField("Email",
+                       validators=[InputRequired(), Email()],
                        render_kw={"placeholder": "Enter your email address"})
 
     first_name = StringField("First name",
+                             validators=[InputRequired()],
                              render_kw={"placeholder": "Enter your first name"})
 
     last_name = StringField("last name",
+                            validators=[InputRequired()],
                             render_kw={"placeholder": "Enter your last name"})
 
 
@@ -37,7 +43,9 @@ class LoginUserForm(FlaskForm):
     """
 
     username = StringField("Username",
+                           validators=[InputRequired()],
                            render_kw={"placeholder": "Enter your username"})
 
     password = PasswordField("Password",
+                             validators=[InputRequired()],
                              render_kw={"placeholder": "Enter your password"})
