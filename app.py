@@ -35,10 +35,8 @@ def display_home():
 
 
 @app.route("/register", methods=["GET", "POST"])
-def display_register_form():
+def register_user():
     """
-    Display a form for a user to register with.
-
     Route & view for registering a new user to the Feedback app.
         - Displays registration form
         - Validates user-entered form values
