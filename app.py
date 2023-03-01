@@ -47,8 +47,13 @@ def register_user():
 
     if form.validate_on_submit():
 
-        new_user = User()
-        form.populate_obj(new_user)
+        username = form.username.data
+        password = form.password.data
+
+        new_user = User.register(username=username, password=password)
+        new_user.email = form.email.data
+        new_user.first_name = form.first_name.data
+        new_user.last_name = form.last_name.data
 
         db.session.add(new_user)
         db.session.commit()
