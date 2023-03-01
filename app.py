@@ -37,7 +37,7 @@ def display_home():
 @app.route("/register", methods=["GET", "POST"])
 def register_user():
     """
-    Route & view for registering a new user to the Feedback app.
+    Route & view for registering a new user to the Feedback app:
         - Displays registration form
         - Validates user-entered form values
         - Handles user registration if validation successful
@@ -64,18 +64,31 @@ def register_user():
     return render_template("register.jinja2", form=form)
 
 
-@app.route("/login")
-def display_login_form():
-    """
-    Display a form for a user to login with.
-    """
-
-
-@app.route("/login", methods=["POST"])
+@ app.route("/login", methods=["GET", "POST"])
 def login_user():
     """
-    Handle user login.
+    Route & view for logging a user in to the Feedback app:
+        - Displays login form
+        - Validates user-entered form values
+        - Handles user authentication
     """
+
+    form = LoginUserForm()
+
+    if form.validate_on_submit():
+
+        username = form.username.data
+        password = form.password.data
+
+        user = User.authenticate(username=username, password=password)
+
+        if user:
+            flash(f"Welcome back, {user.username}!")
+            return redirect("/secret")
+        else:
+            flash("ERROR: could not log you in.")
+
+    return render_template("login.jinja2", form=form)
 
 
 @app.route("/secret")
