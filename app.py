@@ -109,6 +109,16 @@ def display_secret():
 
     return render_template("secret.jinja2")
 
+
+@app.route("/logout")
+def logout_user():
+    """
+    Log user out and redirect to homepage.
+    """
+
+    session.pop("username")
+    return redirect("/")
+
 # -------------------------------------------------------------------------------------------------
 
 
