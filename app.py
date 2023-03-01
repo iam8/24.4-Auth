@@ -90,8 +90,8 @@ def login_user():
 
             return redirect("/secret")
         else:
-            form.username.errors = ["Incorrect username or password"]
-
+            # form.username.errors = ["Incorrect username or password"]
+            flash("ERROR: incorrect username and/or password")
             return redirect("/login")
 
     return render_template("login.jinja2", form=form)
