@@ -40,6 +40,10 @@ def display_register_form():
     Display a form for a user to register with.
     """
 
+    form = RegisterUserForm()
+
+    return render_template("register.jinja2", form=form)
+
 
 @app.route("/register", methods=["POST"])
 def register_user():
