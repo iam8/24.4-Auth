@@ -100,10 +100,14 @@ def login_user():
 @app.route("/secret")
 def display_secret():
     """
-    Display a secret message.
+    Display a secret message - intended for logged-in users only.
     """
 
-    return "You made it!"
+    if "username" not in session:
+        flash("You must be logged in to view!")
+        return redirect("/login")
+
+    return render_template("secret.jinja2")
 
 # -------------------------------------------------------------------------------------------------
 
