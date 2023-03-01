@@ -6,7 +6,7 @@
 Flask app for user feedback: route and view definitions.
 """
 
-from flask import Flask, redirect, render_template
+from flask import Flask, redirect, render_template, flash
 from flask_debugtoolbar import DebugToolbarExtension
 
 from models import db, connect_db, User
@@ -49,6 +49,13 @@ def display_register_form():
 
     if form.validate_on_submit():
 
+        new_user = User()
+        form.populate_obj(new_user)
+
+        db.session.add(new_user)
+        db.session.commit()
+
+        flash(f"Registration successful for user {new_user.username}!")
         return redirect("/secret")
 
     return render_template("register.jinja2", form=form)
