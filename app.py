@@ -87,6 +87,7 @@ def login_user():
             return redirect("/secret")
         else:
             flash("ERROR: could not log you in.")
+            return redirect("/login")
 
     return render_template("login.jinja2", form=form)
 
