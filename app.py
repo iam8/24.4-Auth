@@ -107,10 +107,11 @@ def display_secret():
         flash("You must be logged in to view!")
         return redirect("/login")
 
-    return render_template("secret.jinja2")
+    user = db.get_or_404(User, session["username"])
+    return render_template("secret.jinja2", user=user)
 
 
-@app.route("/users/<int:username>")
+@app.route("/users/<username>")
 def display_user_info(username):
     """
     Display information about the given user.
