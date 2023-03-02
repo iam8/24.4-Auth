@@ -88,7 +88,7 @@ def login_user():
             session["username"] = user.username  # Keep user logged in
             flash(f"Welcome back, {user.username}!")
 
-            return redirect("/secret")
+            return redirect(f"/users/{user.username}")
         else:
             # form.username.errors = ["Incorrect username or password"]
             flash("ERROR: incorrect username and/or password")
@@ -108,6 +108,22 @@ def display_secret():
         return redirect("/login")
 
     return render_template("secret.jinja2")
+
+
+@app.route("/users/<int:username>")
+def display_user_info(username):
+    """
+    Display information about the given user.
+
+    Only logged in users can view this page.
+    """
+
+    if "username" not in session:
+        flash("You must be logged in to view this page!")
+        return redirect("/login")
+
+    user = db.session.get_or_404(User, username)
+    return render_template("user_info.jinja2", user=user)
 
 
 @app.route("/logout")
