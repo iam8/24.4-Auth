@@ -122,7 +122,7 @@ def display_user_info(username):
         flash("You must be logged in to view this page!")
         return redirect("/login")
 
-    user = db.session.get_or_404(User, username)
+    user = db.get_or_404(User, username)
     return render_template("user_info.jinja2", user=user)
 
 
