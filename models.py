@@ -62,3 +62,18 @@ class User(db.Model):
             return user
         else:
             return False
+
+
+class Feedback(db.Model):
+    """
+    Model for a feedback entry submitted by a user.
+
+    One feedback entry can only have one user.
+    """
+
+    __tablename__ = "feedbacks"  # Awkward grammar
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    title = db.Column(db.String(100), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    username = db.Column(db.Text, db.ForeignKey("users.username"), nullable=False)
