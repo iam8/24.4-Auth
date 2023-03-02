@@ -12,4 +12,15 @@
 
 {% block content %}
 
+    <h1>Profile: {{ user.username }}</h1>
+
+    <div>
+        <div>
+            Email: {{ user.email }}
+        </div>
+        <div>
+            Name: {{ user.first_name }} {{ user.last_name }}
+        </div>
+    </div>
+
 {% endblock content %}
