@@ -123,6 +123,9 @@ def display_user_info(username):
         flash("You must be logged in to view this page!")
         return redirect("/login")
 
+    # TODO: handle case where user is logged in but tries to access the detail page of another user
+    # (they shouldn't be allowed to)
+
     user = db.get_or_404(User, username)
     return render_template("user_info.jinja2", user=user)
 
