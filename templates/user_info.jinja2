@@ -23,4 +23,27 @@
         </div>
     </div>
 
+    <div>
+        <h3>Feedback by this User</h3>
+
+        <ul>
+            {% for fb in user.feedbacks %}
+                <li>
+                    <a>{{ fb.title }}</a>
+                    <a><button>Edit</button></a>
+                    <a><button>Delete</button></a>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <div>
+            <a><button>Add more feedback</button></a>
+        </div>
+
+        <div>
+            <a><button>Delete user</button></a>
+        </div>
+
+    </div>
+
 {% endblock content %}
