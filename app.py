@@ -258,6 +258,30 @@ def update_feedback(feedback_id):
     Redirect to user profile page after feedback is successfully updated.
     """
 
+    if "username" not in session:
+        flash(PLEASE_LOGIN)
+        return redirect("/login")
+
+    feedback = db.get_or_404(Feedback, feedback_id)
+    user = feedback.user
+
+    # Users shouldn't be able to add feedback for a different user
+    curr_username = session["username"]
+    if curr_username != user.username:
+        flash("You cannot view this page unless you are logged in as that user!")
+        return redirect(f"/users/{curr_username}")
+
+    form = UpdateFeedbackForm(obj=feedback)
+
+    if form.validate_on_submit():
+        feedback.content = form.content.data
+        db.session.commit()
+
+        flash("Feedback successfully updated!")
+        return redirect(f"/users/{curr_username}")
+
+    return render_template("feedback_update.jinja2", form=form, user=user, feedback=feedback)
+
 
 @app.route("/feedback/<feedback_id>/delete", methods=["POST"])
 def delete_feedback(feedback_id):
