@@ -41,7 +41,9 @@
         </div>
 
         <div>
-            <a><button>Delete user</button></a>
+            <form action="/users/{{ user.username }}/delete", method="POST">
+                <button>Delete user</button>
+            </form>
         </div>
 
     </div>
