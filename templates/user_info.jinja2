@@ -29,9 +29,11 @@
         <ul>
             {% for fb in feedback %}
                 <li>
-                    <a>{{ fb.title }}</a>
+                    {{ fb.title }}
                     <a><button>Edit</button></a>
-                    <a><button>Delete</button></a>
+                    <form style="display:inline" action="/feedback/{{ fb.id }}/delete", method="POST">
+                        <button>Delete</button>
+                    </form>
                 </li>
             {% endfor %}
         </ul>
