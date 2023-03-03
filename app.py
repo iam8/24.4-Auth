@@ -41,12 +41,19 @@ def register_user():
         - Displays registration form
         - Validates user-entered form values
         - Handles user registration if validation successful
+
+    Flash a message and redirect to user info page if user is not currently logged out when trying
+    to access this page.
     """
+
+    # Handle case when user is currently logged in
+    if "username" in session:
+        flash("You must be logged out to access this page.")
+        return redirect(f"/users/{session['username']}")
 
     form = RegisterUserForm()
 
     if form.validate_on_submit():
-
         username = form.username.data
         password = form.password.data
 
@@ -73,7 +80,15 @@ def login_user():
         - Displays login form
         - Validates user-entered form values
         - Handles user authentication
+
+    Flash a message and redirect to user info page if user is not currently logged out when trying
+    to access this page.
     """
+
+    # Handle case when user is currently logged in
+    if "username" in session:
+        flash("You must be logged out to access this page.")
+        return redirect(f"/users/{session['username']}")
 
     form = LoginUserForm()
 
@@ -90,7 +105,6 @@ def login_user():
 
             return redirect(f"/users/{user.username}")
         else:
-            # form.username.errors = ["Incorrect username or password"]
             flash("ERROR: incorrect username and/or password")
             return redirect("/login")
 
@@ -123,8 +137,11 @@ def display_user_info(username):
         flash("You must be logged in to view this page!")
         return redirect("/login")
 
-    # TODO: handle case where user is logged in but tries to access the detail page of another user
-    # (they shouldn't be allowed to)
+    # User's shouldn't be able to access the profile of a different user
+    curr_username = session["username"]
+    if curr_username != username:
+        flash("You cannot view this page unless you are logged in as that user!")
+        return redirect(f"/users/{curr_username}")
 
     user = db.get_or_404(User, username)
     return render_template("user_info.jinja2", user=user)
@@ -134,7 +151,13 @@ def display_user_info(username):
 def logout_user():
     """
     Log user out and redirect to homepage.
+
+    Redirect to homepage if user is not currently logged in when accessing this page.
     """
+
+    if "username" not in session:
+        flash("You must be logged in to access this page.")
+        return redirect("/login")
 
     session.pop("username")
     flash("You have been logged out.")
