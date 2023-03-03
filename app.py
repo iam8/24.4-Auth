@@ -10,7 +10,7 @@ from flask import Flask, redirect, render_template, session, flash
 from flask_debugtoolbar import DebugToolbarExtension
 
 from models import db, connect_db, User, Feedback
-from forms import RegisterUserForm, LoginUserForm
+from forms import RegisterUserForm, LoginUserForm, AddFeedbackForm, UpdateFeedbackForm
 
 
 app = Flask(__name__)
@@ -145,7 +145,7 @@ def display_user_info(username):
         flash(PLEASE_LOGIN)
         return redirect("/login")
 
-    # User's shouldn't be able to access the profile of a different user
+    # Users shouldn't be able to access the profile of a different user
     curr_username = session["username"]
     if curr_username != username:
         flash("You cannot view this page unless you are logged in as that user!")
@@ -217,6 +217,32 @@ def add_feedback(username):
 
     Redirect to user profile page after feedback is successfully added.
     """
+
+    if "username" not in session:
+        flash(PLEASE_LOGIN)
+        return redirect("/login")
+
+    # Users shouldn't be able to add feedback for a different user
+    curr_username = session["username"]
+    if curr_username != username:
+        flash("You cannot view this page unless you are logged in as that user!")
+        return redirect(f"/users/{curr_username}")
+
+    user = db.get_or_404(User, username)
+    form = AddFeedbackForm()
+
+    if form.validate_on_submit():
+        title = form.title.data
+        content = form.content.data
+
+        new_fb = Feedback(title=title, content=content, username=username)
+        db.session.add(new_fb)
+        db.session.commit()
+
+        flash("Feedback successfully added!")
+        return redirect(f"/users/{username}")
+
+    return render_template("feedback_add.jinja2", form=form, user=user)
 
 
 @app.route("/feedback/<feedback_id>/update", methods=["GET", "POST"])
