@@ -28,6 +28,8 @@ PLEASE_LOGOUT = "NOTICE: You must be logged out to access this page."
 # TODO: handle case when a user tries to enter an existing username in registration - currently,
 # the app will just crash
 
+# TODO: put code for checking if user is logged in or not in helper function
+
 
 # USER ROUTES -------------------------------------------------------------------------------------
 
@@ -178,8 +180,25 @@ def delete_user(username):
         - Only the corresponding logged-in user can delete their profile.
 
     Log the user out and redirect to homepage.
-
     """
+
+    if "username" not in session:
+        flash(PLEASE_LOGIN)
+        return redirect("/login")
+
+    # User's shouldn't be able to delete the profile of a different user
+    curr_username = session["username"]
+    if curr_username != username:
+        flash("You must be logged in as the correct user!")
+        return redirect(f"/users/{curr_username}")
+
+    user = db.get_or_404(User, username)
+    db.session.delete(user)
+    db.session.commit()
+
+    session.pop("username")
+    flash("User successfully deleted.")
+    return redirect("/")
 
 # -------------------------------------------------------------------------------------------------
 
@@ -222,6 +241,12 @@ def delete_feedback(feedback_id):
 
     Redirect to user profile page after feedback is successfully deleted.
     """
+
+
+# -------------------------------------------------------------------------------------------------
+
+
+# HELPERS -----------------------------------------------------------------------------------------
 
 
 # -------------------------------------------------------------------------------------------------
