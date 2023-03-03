@@ -22,6 +22,9 @@ app.config["DEBUG_TB_INTERCEPT_REDIRECTS"] = False
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///feedback"
 # app.config['SQLALCHEMY_ECHO'] = True
 
+PLEASE_LOGIN = "NOTICE: You must be logged in to access this page."
+PLEASE_LOGOUT = "NOTICE: You must be logged out to access this page."
+
 
 # ROUTES & VIEWS ----------------------------------------------------------------------------------
 
@@ -46,9 +49,9 @@ def register_user():
     to access this page.
     """
 
-    # Handle case when user is currently logged in
+    # Handle case when user is already logged in
     if "username" in session:
-        flash("You must be logged out to access this page.")
+        flash(PLEASE_LOGOUT)
         return redirect(f"/users/{session['username']}")
 
     form = RegisterUserForm()
@@ -85,9 +88,9 @@ def login_user():
     to access this page.
     """
 
-    # Handle case when user is currently logged in
+    # Handle case when user is already logged in
     if "username" in session:
-        flash("You must be logged out to access this page.")
+        flash(PLEASE_LOGOUT)
         return redirect(f"/users/{session['username']}")
 
     form = LoginUserForm()
@@ -118,7 +121,7 @@ def display_secret():
     """
 
     if "username" not in session:
-        flash("You must be logged in to view!")
+        flash(PLEASE_LOGIN)
         return redirect("/login")
 
     user = db.get_or_404(User, session["username"])
@@ -134,7 +137,7 @@ def display_user_info(username):
     """
 
     if "username" not in session:
-        flash("You must be logged in to view this page!")
+        flash(PLEASE_LOGIN)
         return redirect("/login")
 
     # User's shouldn't be able to access the profile of a different user
@@ -156,7 +159,7 @@ def logout_user():
     """
 
     if "username" not in session:
-        flash("You must be logged in to access this page.")
+        flash(PLEASE_LOGIN)
         return redirect("/login")
 
     session.pop("username")
