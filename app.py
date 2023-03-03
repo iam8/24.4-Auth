@@ -25,8 +25,11 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///feedback"
 PLEASE_LOGIN = "NOTICE: You must be logged in to access this page."
 PLEASE_LOGOUT = "NOTICE: You must be logged out to access this page."
 
+# TODO: handle case when a user tries to enter an existing username in registration - currently,
+# the app will just crash
 
-# ROUTES & VIEWS ----------------------------------------------------------------------------------
+
+# USER ROUTES -------------------------------------------------------------------------------------
 
 @app.route("/")
 def display_home():
@@ -131,7 +134,7 @@ def display_secret():
 @app.route("/users/<username>")
 def display_user_info(username):
     """
-    Display information about the given user.
+    Display information about the given user, including feedback posted by this user.
 
     Only logged in users can view this page.
     """
@@ -147,7 +150,8 @@ def display_user_info(username):
         return redirect(f"/users/{curr_username}")
 
     user = db.get_or_404(User, username)
-    return render_template("user_info.jinja2", user=user)
+    feedback = user.feedbacks
+    return render_template("user_info.jinja2", user=user, feedback=feedback)
 
 
 @app.route("/logout")
@@ -165,6 +169,60 @@ def logout_user():
     session.pop("username")
     flash("You have been logged out.")
     return redirect("/")
+
+
+@app.route("/users/<username>/delete", methods=["POST"])
+def delete_user(username):
+    """
+    Delete the user with the given username, and delete all feedback posted by this user.
+        - Only the corresponding logged-in user can delete their profile.
+
+    Log the user out and redirect to homepage.
+
+    """
+
+# -------------------------------------------------------------------------------------------------
+
+
+# Feedback routes ---------------------------------------------------------------------------------
+
+@app.route("/users/<username>/feedback/add", methods=["GET", "POST"])
+def add_feedback(username):
+    """
+    Route & view for adding feedback for the given user:
+        - Display feedback form
+        - Validate user-entered form values
+        - Add the new feedback to this user
+
+    Only the corresponding logged-in user can add feedback.
+
+    Redirect to user profile page after feedback is successfully added.
+    """
+
+
+@app.route("/feedback/<feedback_id>/update", methods=["GET", "POST"])
+def update_feedback(feedback_id):
+    """
+    Route & view for updating feedback for the given user:
+        - Display feedback edit form
+        - Validate user-entered form values
+        - Update the new feedback for this user
+
+    Only the corresponding logged-in user can update their feedback.
+
+    Redirect to user profile page after feedback is successfully updated.
+    """
+
+
+@app.route("/feedback/<feedback_id>/delete", methods=["POST"])
+def delete_feedback(feedback_id):
+    """
+    Delete the feedback with the given ID.
+        - Only the corresponding logged-in user can delete their feedback.
+
+    Redirect to user profile page after feedback is successfully deleted.
+    """
+
 
 # -------------------------------------------------------------------------------------------------
 
