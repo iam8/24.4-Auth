@@ -35,6 +35,8 @@ class User(db.Model):
     first_name = db.Column(db.String(30), nullable=False)
     last_name = db.Column(db.String(30), nullable=False)
 
+    feedbacks = db.relationship("Feedback", backref="user", cascade="all, delete-orphan")
+
     @classmethod
     def register(cls, username, password):
         """
@@ -63,6 +65,13 @@ class User(db.Model):
         else:
             return False
 
+    def __repr__(self):
+        """
+        Return a string representation of this user: <User username, email, first_name, last_name>
+        """
+
+        return f"<User {self.username} {self.email} {self.first_name} {self.last_name}>"
+
 
 class Feedback(db.Model):
     """
@@ -77,3 +86,10 @@ class Feedback(db.Model):
     title = db.Column(db.String(100), nullable=False)
     content = db.Column(db.Text, nullable=False)
     username = db.Column(db.Text, db.ForeignKey("users.username"), nullable=False)
+
+    def __repr__(self):
+        """
+        Return a string representation of this feedback: <Feedback id, username>
+        """
+
+        return f"<Feedback {self.id} {self.username}>"
