@@ -18,9 +18,10 @@
 
         <fieldset>
             {% for field in form if field.widget.input_type != "hidden" %}
-
                 <div>
                     {{ field.label }}
+                </div>
+                <div>
                     {{ field }}
                 </div>
 
@@ -34,5 +35,4 @@
         <button type="submit">Add</button>
     </form>
 
-{% endblock content %}
 {% endblock content %}
