@@ -30,8 +30,14 @@
             {% for fb in feedback %}
                 <li>
                     {{ fb.title }}
-                    <a><button>Edit</button></a>
-                    <form style="display:inline" action="/feedback/{{ fb.id }}/delete", method="POST">
+                    <form style="display:inline"
+                          action="/feedback/{{ fb.id }}/update">
+                        <button>Edit</button>
+                    </form>
+
+                    <form style="display:inline"
+                          action="/feedback/{{ fb.id }}/delete"
+                          method="POST">
                         <button>Delete</button>
                     </form>
                 </li>
@@ -39,7 +45,9 @@
         </ul>
 
         <div>
-            <a><button>Add more feedback</button></a>
+            <form action="/users/{{ user.username }}/feedback/add">
+                <button>Add more feedback</button>
+            </form>
         </div>
 
         <div>
