@@ -9,7 +9,7 @@ Flask app for user feedback: route and view definitions.
 from flask import Flask, redirect, render_template, session, flash
 from flask_debugtoolbar import DebugToolbarExtension
 
-from models import db, connect_db, User
+from models import db, connect_db, User, Feedback
 from forms import RegisterUserForm, LoginUserForm
 
 
@@ -186,7 +186,7 @@ def delete_user(username):
         flash(PLEASE_LOGIN)
         return redirect("/login")
 
-    # User's shouldn't be able to delete the profile of a different user
+    # Users shouldn't be able to delete the profile of a different user
     curr_username = session["username"]
     if curr_username != username:
         flash("You must be logged in as the correct user!")
@@ -242,6 +242,23 @@ def delete_feedback(feedback_id):
     Redirect to user profile page after feedback is successfully deleted.
     """
 
+    if "username" not in session:
+        flash(PLEASE_LOGIN)
+        return redirect("/login")
+
+    feedback = db.get_or_404(Feedback, feedback_id)
+
+    # Users shouldn't be able to delete the feedback written by a different user
+    curr_username = session["username"]
+    if curr_username != feedback.user.username:
+        flash("You must be logged in as the correct user!")
+        return redirect(f"/users/{curr_username}")
+
+    db.session.delete(feedback)
+    db.session.commit()
+
+    flash("Feedback successfully deleted.")
+    return redirect(f"/users/{curr_username}")
 
 # -------------------------------------------------------------------------------------------------
 
