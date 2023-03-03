@@ -1,0 +1,39 @@
+{# Ioana A Mititean #}
+{# 24.4 Exercise: Auth #}
+{# Flask Feedback #}
+
+{# Page for updating existing feedback. #}
+
+{% extends "base.jinja2" %}
+
+{% block title %}
+    Edit Feedback
+{% endblock title %}
+
+{% block content %}
+    <h1>Edit Feedback: {{ user.username }}</h1>
+    <h3>Feedback title: '{{ feedback.title }}'</h3>
+
+    <form method="POST">
+        {{ form.hidden_tag() }}
+
+        <fieldset>
+            {% for field in form if field.widget.input_type != "hidden" %}
+                <div>
+                    {{ field.label }}
+                </div>
+                <div>
+                    {{ field(style="width:50%") }}
+                </div>
+
+                {% for error in field.errors %}
+                    <span>{{ error }}</span>
+                {% endfor %}
+
+            {% endfor %}
+        </fieldset>
+
+        <button type="submit">Save</button>
+    </form>
+
+{% endblock content %}
