@@ -28,9 +28,6 @@ PLEASE_LOGOUT = "NOTICE: You must be logged out to access this page."
 WRONG_USER_MSG = "NOTICE: You cannot view this page unless you are logged in as that user."
 WRONG_CREDS_MSG = "ERROR: Incorrect username and/or password."
 
-# TODO: handle case when a user tries to enter an existing username in registration - currently,
-# the app will just crash
-
 # TODO: put code for checking if user is logged in or not in helper function
 
 
@@ -59,8 +56,9 @@ def register_user():
 
     # Handle case when user is already logged in
     if "username" in session:
-        flash(PLEASE_LOGOUT)
-        return redirect(f"/users/{session['username']}")
+        # flash(PLEASE_LOGOUT)
+        # return redirect(f"/users/{session['username']}")
+        return handle_user_logged_in(f"/users/{session['username']}")
 
     form = RegisterUserForm()
 
@@ -73,7 +71,7 @@ def register_user():
         new_user.first_name = form.first_name.data
         new_user.last_name = form.last_name.data
 
-        # Display message if username is taken
+        # Display message and redirect to register page if username is taken
         try:
             db.session.add(new_user)
             db.session.commit()
@@ -103,8 +101,9 @@ def login_user():
 
     # Handle case when user is already logged in
     if "username" in session:
-        flash(PLEASE_LOGOUT)
-        return redirect(f"/users/{session['username']}")
+        # flash(PLEASE_LOGOUT)
+        # return redirect(f"/users/{session['username']}")
+        return handle_user_logged_in(f"/users/{session['username']}")
 
     form = LoginUserForm()
 
@@ -118,7 +117,6 @@ def login_user():
         if user:
             session["username"] = user.username  # Keep user logged in
             flash(f"Welcome back, {user.username}!")
-
             return redirect(f"/users/{user.username}")
         else:
             flash(WRONG_CREDS_MSG)
@@ -134,8 +132,9 @@ def display_secret():
     """
 
     if "username" not in session:
-        flash(PLEASE_LOGIN)
-        return redirect("/login")
+        # flash(PLEASE_LOGIN)
+        # return redirect("/login")
+        return handle_user_not_logged_in()
 
     user = db.get_or_404(User, session["username"])
     return render_template("secret.jinja2", user=user)
@@ -150,8 +149,9 @@ def display_user_info(username):
     """
 
     if "username" not in session:
-        flash(PLEASE_LOGIN)
-        return redirect("/login")
+        # flash(PLEASE_LOGIN)
+        # return redirect("/login")
+        return handle_user_not_logged_in()
 
     # Users shouldn't be able to access the profile of a different user
     curr_username = session["username"]
@@ -173,8 +173,9 @@ def logout_user():
     """
 
     if "username" not in session:
-        flash(PLEASE_LOGIN)
-        return redirect("/login")
+        # flash(PLEASE_LOGIN)
+        # return redirect("/login")
+        return handle_user_not_logged_in()
 
     session.pop("username")
     flash("You have been logged out.")
@@ -191,8 +192,9 @@ def delete_user(username):
     """
 
     if "username" not in session:
-        flash(PLEASE_LOGIN)
-        return redirect("/login")
+        # flash(PLEASE_LOGIN)
+        # return redirect("/login")
+        return handle_user_not_logged_in()
 
     # Users shouldn't be able to delete the profile of a different user
     curr_username = session["username"]
@@ -227,8 +229,9 @@ def add_feedback(username):
     """
 
     if "username" not in session:
-        flash(PLEASE_LOGIN)
-        return redirect("/login")
+        # flash(PLEASE_LOGIN)
+        # return redirect("/login")
+        return handle_user_not_logged_in()
 
     # Users shouldn't be able to add feedback for a different user
     curr_username = session["username"]
@@ -267,8 +270,9 @@ def update_feedback(feedback_id):
     """
 
     if "username" not in session:
-        flash(PLEASE_LOGIN)
-        return redirect("/login")
+        # flash(PLEASE_LOGIN)
+        # return redirect("/login")
+        return handle_user_not_logged_in()
 
     feedback = db.get_or_404(Feedback, feedback_id)
     user = feedback.user
@@ -301,8 +305,9 @@ def delete_feedback(feedback_id):
     """
 
     if "username" not in session:
-        flash(PLEASE_LOGIN)
-        return redirect("/login")
+        # flash(PLEASE_LOGIN)
+        # return redirect("/login")
+        return handle_user_not_logged_in()
 
     feedback = db.get_or_404(Feedback, feedback_id)
 
@@ -323,6 +328,26 @@ def delete_feedback(feedback_id):
 
 # HELPERS -----------------------------------------------------------------------------------------
 
+def handle_user_not_logged_in():
+    """
+    Handle case when user is not currently logged in, but must be.
+
+    Flash a message and return a redirect to the login page.
+    """
+
+    flash(PLEASE_LOGIN)
+    return redirect("/login")
+
+
+def handle_user_logged_in(redirect_to):
+    """
+    Handle case when user is currently logged in, but must not be.
+
+    Flash a message and return a redirect to the given URL.
+    """
+
+    flash(PLEASE_LOGOUT)
+    return redirect(redirect_to)
 
 # -------------------------------------------------------------------------------------------------
 
