@@ -8,6 +8,7 @@ Flask app for user feedback: route and view definitions.
 
 from flask import Flask, redirect, render_template, session, flash
 from flask_debugtoolbar import DebugToolbarExtension
+from sqlalchemy.exc import IntegrityError
 
 from models import db, connect_db, User, Feedback
 from forms import RegisterUserForm, LoginUserForm, AddFeedbackForm, UpdateFeedbackForm
@@ -72,12 +73,17 @@ def register_user():
         new_user.first_name = form.first_name.data
         new_user.last_name = form.last_name.data
 
-        db.session.add(new_user)
-        db.session.commit()
+        # Display message if username is taken
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            flash("ERROR: That username is taken - please choose another username.")
+            return redirect("/register")
 
         session["username"] = new_user.username  # Keep user logged in
         flash(f"Registration successful for user {new_user.username}!")
-
         return redirect("/secret")
 
     return render_template("register.jinja2", form=form)
