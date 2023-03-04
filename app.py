@@ -24,6 +24,8 @@ app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///feedback"
 
 PLEASE_LOGIN = "NOTICE: You must be logged in to access this page."
 PLEASE_LOGOUT = "NOTICE: You must be logged out to access this page."
+WRONG_USER_MSG = "NOTICE: You cannot view this page unless you are logged in as that user."
+WRONG_CREDS_MSG = "ERROR: Incorrect username and/or password."
 
 # TODO: handle case when a user tries to enter an existing username in registration - currently,
 # the app will just crash
@@ -113,7 +115,7 @@ def login_user():
 
             return redirect(f"/users/{user.username}")
         else:
-            flash("ERROR: incorrect username and/or password")
+            flash(WRONG_CREDS_MSG)
             return redirect("/login")
 
     return render_template("login.jinja2", form=form)
@@ -148,7 +150,7 @@ def display_user_info(username):
     # Users shouldn't be able to access the profile of a different user
     curr_username = session["username"]
     if curr_username != username:
-        flash("You cannot view this page unless you are logged in as that user!")
+        flash(WRONG_USER_MSG)
         return redirect(f"/users/{curr_username}")
 
     user = db.get_or_404(User, username)
@@ -189,7 +191,7 @@ def delete_user(username):
     # Users shouldn't be able to delete the profile of a different user
     curr_username = session["username"]
     if curr_username != username:
-        flash("You must be logged in as the correct user!")
+        flash(WRONG_USER_MSG)
         return redirect(f"/users/{curr_username}")
 
     user = db.get_or_404(User, username)
@@ -225,7 +227,7 @@ def add_feedback(username):
     # Users shouldn't be able to add feedback for a different user
     curr_username = session["username"]
     if curr_username != username:
-        flash("You cannot view this page unless you are logged in as that user!")
+        flash(WRONG_USER_MSG)
         return redirect(f"/users/{curr_username}")
 
     user = db.get_or_404(User, username)
@@ -268,7 +270,7 @@ def update_feedback(feedback_id):
     # Users shouldn't be able to add feedback for a different user
     curr_username = session["username"]
     if curr_username != user.username:
-        flash("You cannot view this page unless you are logged in as that user!")
+        flash(WRONG_USER_MSG)
         return redirect(f"/users/{curr_username}")
 
     form = UpdateFeedbackForm(obj=feedback)
@@ -301,7 +303,7 @@ def delete_feedback(feedback_id):
     # Users shouldn't be able to delete the feedback written by a different user
     curr_username = session["username"]
     if curr_username != feedback.user.username:
-        flash("You must be logged in as the correct user!")
+        flash(WRONG_USER_MSG)
         return redirect(f"/users/{curr_username}")
 
     db.session.delete(feedback)
