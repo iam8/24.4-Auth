@@ -313,6 +313,34 @@ def flash_and_redirect(msg, redirect_to):
     flash(msg)
     return redirect(redirect_to)
 
+
+def check_and_handle_user_logged_in():
+    """
+    Check and handle if user is currently logged in, but must be logged out.
+
+    If the user is logged in:
+        - Flash a message and return a redirect to the user's profile page.
+
+    Otherwise, return None.
+    """
+
+    if "username" in session:
+        return flash_and_redirect(PLEASE_LOGOUT, f"/users/{session['username']}")
+
+
+def check_and_handle_user_not_logged_in():
+    """
+    Check and handle if user is currently logged out, but must be logged in.
+
+    If the user is logged out:
+        - Flash a message and return a redirect to the login page.
+
+    Otherwise, return None.
+    """
+
+    if "username" not in session:
+        return flash_and_redirect(PLEASE_LOGIN, "/login")
+
 # -------------------------------------------------------------------------------------------------
 
 
