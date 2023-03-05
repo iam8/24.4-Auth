@@ -23,12 +23,12 @@ app.config["DEBUG_TB_INTERCEPT_REDIRECTS"] = False
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql:///feedback"
 # app.config['SQLALCHEMY_ECHO'] = True
 
+# Some common messages to display to user
 PLEASE_LOGIN = "NOTICE: You must be logged in to access this page."
 PLEASE_LOGOUT = "NOTICE: You must be logged out to access this page."
 WRONG_USER_MSG = "NOTICE: You cannot view this page unless you are logged in as that user."
 WRONG_CREDS_MSG = "ERROR: Incorrect username and/or password."
-
-# TODO: put code for checking if user is logged in or not in helper function
+UNAME_TAKEN_MSG = "ERROR: That username is unavailable."
 
 
 # USER ROUTES -------------------------------------------------------------------------------------
@@ -55,8 +55,9 @@ def register_user():
     """
 
     # Handle case when user is already logged in
-    if "username" in session:
-        return flash_and_redirect(PLEASE_LOGOUT, f"/users/{session['username']}")
+    redir_profile = check_and_handle_user_logged_in()
+    if redir_profile:
+        return redir_profile
 
     form = RegisterUserForm()
 
@@ -75,12 +76,11 @@ def register_user():
             db.session.commit()
         except IntegrityError:
             db.session.rollback()
-            flash("ERROR: That username is taken - please choose another username.")
-            return redirect("/register")
+            return flash_and_redirect(UNAME_TAKEN_MSG, "/register")
 
         session["username"] = new_user.username  # Keep user logged in
-        flash(f"Registration successful for user {new_user.username}!")
-        return redirect("/secret")
+        return flash_and_redirect(f"Registration successful for user {new_user.username}!",
+                                  "/secret")
 
     return render_template("register.jinja2", form=form)
 
@@ -98,8 +98,9 @@ def login_user():
     """
 
     # Handle case when user is already logged in
-    if "username" in session:
-        return flash_and_redirect(PLEASE_LOGOUT, f"/users/{session['username']}")
+    redir_profile = check_and_handle_user_logged_in()
+    if redir_profile:
+        return redir_profile
 
     form = LoginUserForm()
 
@@ -112,11 +113,9 @@ def login_user():
 
         if user:
             session["username"] = user.username  # Keep user logged in
-            flash(f"Welcome back, {user.username}!")
-            return redirect(f"/users/{user.username}")
+            return flash_and_redirect(f"Welcome back, {user.username}!", f"/users/{user.username}")
         else:
-            flash(WRONG_CREDS_MSG)
-            return redirect("/login")
+            return flash_and_redirect(WRONG_CREDS_MSG, "/login")
 
     return render_template("login.jinja2", form=form)
 
@@ -127,8 +126,9 @@ def display_secret():
     Display a secret message - intended for logged-in users only.
     """
 
-    if "username" not in session:
-        return flash_and_redirect(PLEASE_LOGIN, "/login")
+    redir_login = check_and_handle_user_not_logged_in()
+    if redir_login:
+        return redir_login
 
     user = db.get_or_404(User, session["username"])
     return render_template("secret.jinja2", user=user)
@@ -142,13 +142,14 @@ def display_user_info(username):
     Only logged in users can view this page.
     """
 
-    if "username" not in session:
-        return flash_and_redirect(PLEASE_LOGIN, "/login")
+    redir_login = check_and_handle_user_not_logged_in()
+    if redir_login:
+        return redir_login
 
     # Users shouldn't be able to access the profile of a different user
-    curr_username = session["username"]
-    if curr_username != username:
-        return flash_and_redirect(WRONG_USER_MSG, f"/users/{curr_username}")
+    redir_profile = check_and_handle_wrong_user(username)
+    if redir_profile:
+        return redir_profile
 
     user = db.get_or_404(User, username)
     feedback = user.feedbacks
@@ -160,15 +161,15 @@ def logout_user():
     """
     Log user out and redirect to homepage.
 
-    Redirect to homepage if user is not currently logged in when accessing this page.
+    Redirect to login page if user is not currently logged in when accessing this page.
     """
 
-    if "username" not in session:
-        return flash_and_redirect(PLEASE_LOGIN, "/login")
+    redir_login = check_and_handle_user_not_logged_in()
+    if redir_login:
+        return redir_login
 
     session.pop("username")
-    flash("You have been logged out.")
-    return redirect("/")
+    return flash_and_redirect("You have been logged out.", "/")
 
 
 @app.route("/users/<username>/delete", methods=["POST"])
@@ -180,21 +181,21 @@ def delete_user(username):
     Log the user out and redirect to homepage.
     """
 
-    if "username" not in session:
-        return flash_and_redirect(PLEASE_LOGIN, "/login")
+    redir_login = check_and_handle_user_not_logged_in()
+    if redir_login:
+        return redir_login
 
     # Users shouldn't be able to delete the profile of a different user
-    curr_username = session["username"]
-    if curr_username != username:
-        return flash_and_redirect(WRONG_USER_MSG, f"/users/{curr_username}")
+    redir_profile = check_and_handle_wrong_user(username)
+    if redir_profile:
+        return redir_profile
 
     user = db.get_or_404(User, username)
     db.session.delete(user)
     db.session.commit()
 
     session.pop("username")
-    flash("User successfully deleted.")
-    return redirect("/")
+    return flash_and_redirect("User successfully deleted.", "/")
 
 # -------------------------------------------------------------------------------------------------
 
@@ -214,13 +215,14 @@ def add_feedback(username):
     Redirect to user profile page after feedback is successfully added.
     """
 
-    if "username" not in session:
-        return flash_and_redirect(PLEASE_LOGIN, "/login")
+    redir_login = check_and_handle_user_not_logged_in()
+    if redir_login:
+        return redir_login
 
     # Users shouldn't be able to add feedback for a different user
-    curr_username = session["username"]
-    if curr_username != username:
-        return flash_and_redirect(WRONG_USER_MSG, f"/users/{curr_username}")
+    redir_profile = check_and_handle_wrong_user(username)
+    if redir_profile:
+        return redir_profile
 
     user = db.get_or_404(User, username)
     form = AddFeedbackForm()
@@ -233,8 +235,7 @@ def add_feedback(username):
         db.session.add(new_fb)
         db.session.commit()
 
-        flash("Feedback successfully added!")
-        return redirect(f"/users/{username}")
+        return flash_and_redirect("Feedback successfully added!", f"/users/{username}")
 
     return render_template("feedback_add.jinja2", form=form, user=user)
 
@@ -252,16 +253,17 @@ def update_feedback(feedback_id):
     Redirect to user profile page after feedback is successfully updated.
     """
 
-    if "username" not in session:
-        return flash_and_redirect(PLEASE_LOGIN, "/login")
+    redir_login = check_and_handle_user_not_logged_in()
+    if redir_login:
+        return redir_login
 
     feedback = db.get_or_404(Feedback, feedback_id)
     user = feedback.user
 
     # Users shouldn't be able to add feedback for a different user
-    curr_username = session["username"]
-    if curr_username != user.username:
-        return flash_and_redirect(WRONG_USER_MSG, f"/users/{curr_username}")
+    redir_profile = check_and_handle_wrong_user(user.username)
+    if redir_profile:
+        return redir_profile
 
     form = UpdateFeedbackForm(obj=feedback)
 
@@ -269,8 +271,8 @@ def update_feedback(feedback_id):
         feedback.content = form.content.data
         db.session.commit()
 
-        flash("Feedback successfully updated!")
-        return redirect(f"/users/{curr_username}")
+        return flash_and_redirect("Feedback successfully updated!",
+                                  f"/users/{session['username']}")
 
     return render_template("feedback_update.jinja2", form=form, user=user, feedback=feedback)
 
@@ -284,21 +286,21 @@ def delete_feedback(feedback_id):
     Redirect to user profile page after feedback is successfully deleted.
     """
 
-    if "username" not in session:
-        return flash_and_redirect(PLEASE_LOGIN, "/login")
+    redir_login = check_and_handle_user_not_logged_in()
+    if redir_login:
+        return redir_login
 
     feedback = db.get_or_404(Feedback, feedback_id)
 
     # Users shouldn't be able to delete the feedback written by a different user
-    curr_username = session["username"]
-    if curr_username != feedback.user.username:
-        return flash_and_redirect(WRONG_USER_MSG, f"/users/{curr_username}")
+    redir_profile = check_and_handle_wrong_user(feedback.user.username)
+    if redir_profile:
+        return redir_profile
 
     db.session.delete(feedback)
     db.session.commit()
 
-    flash("Feedback successfully deleted.")
-    return redirect(f"/users/{curr_username}")
+    return flash_and_redirect("Feedback successfully deleted.", f"/users/{session['username']}")
 
 # -------------------------------------------------------------------------------------------------
 
@@ -340,6 +342,21 @@ def check_and_handle_user_not_logged_in():
 
     if "username" not in session:
         return flash_and_redirect(PLEASE_LOGIN, "/login")
+
+
+def check_and_handle_wrong_user(target_uname):
+    """
+    Check if the given username matches the currently logged-in user.
+
+    If user doesn't match:
+        - Flash a message and return a redirect to the current user's profile page.
+
+    Otherwise, return None.
+    """
+
+    curr_username = session["username"]
+    if curr_username != target_uname:
+        return flash_and_redirect(WRONG_USER_MSG, f"/users/{curr_username}")
 
 # -------------------------------------------------------------------------------------------------
 
