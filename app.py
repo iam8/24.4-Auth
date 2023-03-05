@@ -260,7 +260,7 @@ def update_feedback(feedback_id):
     feedback = db.get_or_404(Feedback, feedback_id)
     user = feedback.user
 
-    # Users shouldn't be able to add feedback for a different user
+    # Users shouldn't be able to update feedback for a different user
     redir_profile = check_and_handle_wrong_user(user.username)
     if redir_profile:
         return redir_profile
